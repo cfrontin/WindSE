@@ -16,7 +16,7 @@ if not main_file in ["sphinx-build", "__main__.py"]:
     import windse
     import numpy as np
     # from fenics import FunctionSpace, Function
-    
+
 def DefaultParameters():
     """
     return the default parameters list
@@ -70,7 +70,7 @@ def Initialize(params_loc=None):
 
     ### Initialize WindSE ###
     windse.initialize(params_loc,updated_parameters=args.updated_parameters)
-    
+
     params=windse.windse_parameters
 
     return params
@@ -88,7 +88,7 @@ def BuildDomain(params):
     -------
     dom : ``windse.GenericDomain``
         the domain object that contains all mesh related information.
-    farm : ``windse.GenericWindFarm`` 
+    farm : ``windse.GenericWindFarm``
         the wind farm object that contains the turbine information.
     """
 
@@ -96,14 +96,16 @@ def BuildDomain(params):
     if params["domain"]["interpolated"]:
         dom_dict = {"box":windse.InterpolatedBoxDomain,
                     "cylinder":windse.InterpolatedCylinderDomain,
-                    "imported":windse.ImportedDomain
+                    "imported":windse.ImportedDomain,
+                    "imported_for_domain":windse.ImportedDomain
         }
     else:
         dom_dict = {"box":windse.BoxDomain,
                     "rectangle":windse.RectangleDomain,
                     "cylinder":windse.CylinderDomain,
                     "circle":windse.CircleDomain,
-                    "imported":windse.ImportedDomain}
+                    "imported":windse.ImportedDomain,
+                    "imported_for_refinement":windse.ImportedDomain}
     dom = dom_dict[params["domain"]["type"]]()
 
 
@@ -111,10 +113,11 @@ def BuildDomain(params):
     farm_dict = {"grid":windse.GridWindFarm,
                  "random":windse.RandomWindFarm,
                  "imported":windse.ImportedWindFarm,
+                 "imported_for_refinement":windse.ImportedWindFarm,
                  "empty":windse.EmptyWindFarm}
     farm = farm_dict[params["wind_farm"]["type"]](dom)
 
-    if dom.type != "imported":
+    if (dom.type != "imported"):
         ### warp and refine the mesh
         windse.WarpMesh(dom)
         windse.RefineMesh(dom,farm)
@@ -147,7 +150,7 @@ def BuildProblem(params,dom,farm):
 
     # dom.Save()
     # exit()
-    
+
     ### Setup Boundary Conditions ###
     bc_dict = {"uniform":windse.UniformInflow,
                "power":windse.PowerInflow,

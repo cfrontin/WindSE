@@ -116,6 +116,17 @@ properties:
       - if:
           properties:
             type:
+              const: "imported_for_refinement"
+        then:
+          required:
+            - path
+            - mesh_path
+            - terrain_path
+            - bound_path
+            - filetype
+      - if:
+          properties:
+            type:
               const: "interpolated"
         then:
           required:
@@ -135,6 +146,7 @@ properties:
           - "cylinder"
           - "circle"
           - "imported"
+          - "imported_for_refinement"
           - "interpolated"
           - Null
       path:

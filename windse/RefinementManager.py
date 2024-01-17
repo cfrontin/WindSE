@@ -1,13 +1,13 @@
 import time
 import numpy as np
 
-def CreateRefinementList(dom, farm, refine_params):  
-    farm_num          = refine_params["farm_num"]       
-    farm_type         = refine_params["farm_type"]      
-    farm_factor       = refine_params["farm_factor"]    
-    turbine_num       = refine_params["turbine_num"]    
-    turbine_type      = refine_params["turbine_type"]    
-    turbine_factor    = refine_params["turbine_factor"] 
+def CreateRefinementList(dom, farm, refine_params):
+    farm_num          = refine_params["farm_num"]
+    farm_type         = refine_params["farm_type"]
+    farm_factor       = refine_params["farm_factor"]
+    turbine_num       = refine_params["turbine_num"]
+    turbine_type      = refine_params["turbine_type"]
+    turbine_factor    = refine_params["turbine_factor"]
     refine_custom     = refine_params["refine_custom"]  ### Need to fix for if the domain is scaled
     refine_power_calc = refine_params["refine_power_calc"]
 
@@ -155,6 +155,7 @@ def RefineMesh(dom,farm):
     ### Define the possible operations ###
     refine_dict = {"full": dom.Refine,
                    "box": dom.BoxRefine,
+                   "file": dom.FileRefine,
                    "cylinder": dom.CylinderRefine,
                    "stream": dom.StreamRefine,
                    "simple": farm.SimpleRefine,
@@ -175,7 +176,7 @@ def RefineMesh(dom,farm):
     for i, refinement_dict in enumerate(refine_list):
         fprint("Refining Mesh Step {:d} of {:d}".format(i+1,num), special="header")
         step_start = time.time()
-        
+
         refine_type = refinement_dict["type"]
         refine_args = dict(refinement_dict)
         del refine_args["type"]
@@ -188,10 +189,10 @@ def RefineMesh(dom,farm):
 
 def WarpMesh(dom):
 
-    warp_type      = dom.params["refine"]["warp_type"]      
-    warp_strength  = dom.params["refine"]["warp_strength"]  
-    warp_height    = dom.params["refine"]["warp_height"]    
-    warp_percent   = dom.params["refine"]["warp_percent"]  
+    warp_type      = dom.params["refine"]["warp_type"]
+    warp_strength  = dom.params["refine"]["warp_strength"]
+    warp_height    = dom.params["refine"]["warp_height"]
+    warp_percent   = dom.params["refine"]["warp_percent"]
 
     if warp_type == "smooth":
         dom.WarpSmooth(warp_strength)

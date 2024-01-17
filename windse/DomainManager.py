@@ -445,6 +445,32 @@ class GenericDomain(object):
         refine_stop = time.time()
         self.fprint("Mesh Refinement Finished: {:1.2f} s".format(refine_stop-refine_start),special="footer")
 
+    def FileRefine(self,filename_refine):
+        refine_start = time.time()
+
+        # to do... for now pick some special elements
+        cell_refine_list = np.load(filename_refine)
+
+        ### Print Information
+        self.fprint("Starting File-Based Refinement",special="header")
+        self.fprint(f"\tLoading refinement specified in:\t{filename_refine}")
+
+        ### Create cell markers ###
+        self.fprint("Marking Cells")
+        cell_f = MeshFunction('bool', self.mesh, self.mesh.geometry().dim(),False)
+        for idx_cell, cell in enumerate(cells(self.mesh)):
+            # print(f"DEBUG!!!!! cell: {idx_cell} {'in' if idx_cell in cell_refine_list else 'not in'} refine list.")
+            if idx_cell in cell_refine_list:
+                cell_f[cell] = True
+            # else:
+            #     cell_f[cell] = False
+
+        ### Refine Mesh
+        self.Refine(cell_f)
+
+        refine_stop = time.time()
+        self.fprint("Mesh Refinement Finished: {:1.2f} s".format(refine_stop-refine_start),special="footer")
+
     def Refine(self, cellmarkers=None):
 
         # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
