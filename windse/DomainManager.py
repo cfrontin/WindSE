@@ -17,8 +17,6 @@ else:
 ### This checks if we are just doing documentation ###
 if not main_file in ["sphinx-build", "__main__.py"]:
     from dolfin import *
-    from mshr import *
-    #from windse.mshr_fake import *
     import copy
     import time
     import warnings
@@ -972,7 +970,7 @@ class BoxDomain(GenericDomain):
             import tempfile
 
             # start up gmsh model
-            gmsh.initialize(sys.argv)
+            gmsh.initialize()
             gmsh.model.add("boxmesh")
 
             # true extents
@@ -1212,22 +1210,23 @@ class CylinderDomain(GenericDomain):
         mesh_start = time.time()
         self.fprint("")
         if self.mesh_type == "mshr":
-            self.fprint("Generating Mesh Using mshr")
+            raise NotImplementedError("Mshr is no longer supported, use gmsh instead.")
+            # self.fprint("Generating Mesh Using mshr")
 
-            ### Create Mesh ###
-            # mshr_circle = Circle(Point(self.center[0],self.center[1]), self.radius, self.nt)
-            # mshr_domain = Extrude2D(mshr_circle,self.z_range[1]-self.z_range[0])
-            top    = Point(self.center[0],self.center[1],self.z_range[1])
-            bottom = Point(self.center[0],self.center[1],self.z_range[0])
-            mshr_domain = Cylinder(top,bottom,self.radius,self.radius,self.nt)
-            self.mesh = generate_mesh(mshr_domain,self.res)
-            # self.mesh = refine(self.mesh)
-            # self.mesh = refine(self.mesh)
-            # self.mesh = refine(self.mesh)
+            # ### Create Mesh ###
+            # # mshr_circle = Circle(Point(self.center[0],self.center[1]), self.radius, self.nt)
+            # # mshr_domain = Extrude2D(mshr_circle,self.z_range[1]-self.z_range[0])
+            # top    = Point(self.center[0],self.center[1],self.z_range[1])
+            # bottom = Point(self.center[0],self.center[1],self.z_range[0])
+            # mshr_domain = Cylinder(top,bottom,self.radius,self.radius,self.nt)
+            # self.mesh = generate_mesh(mshr_domain,self.res)
+            # # self.mesh = refine(self.mesh)
+            # # self.mesh = refine(self.mesh)
+            # # self.mesh = refine(self.mesh)
 
-            # z = self.mesh.coordinates()[:,2]#+self.z_range[0]
-            # self.mesh.coordinates()[:,2] = z
-            # self.mesh.bounding_box_tree().build(self.mesh)
+            # # z = self.mesh.coordinates()[:,2]#+self.z_range[0]
+            # # self.mesh.coordinates()[:,2] = z
+            # # self.mesh.bounding_box_tree().build(self.mesh)
 
         elif self.mesh_type == "gmsh":
             self.fprint("Generating Mesh Using gmsh")
@@ -1238,7 +1237,7 @@ class CylinderDomain(GenericDomain):
             import tempfile
 
             # start up gmsh model
-            gmsh.initialize(sys.argv)
+            gmsh.initialize()
             gmsh.model.add("circmesh")
             factory = gmsh.model.occ
 
@@ -1459,12 +1458,13 @@ class CircleDomain(GenericDomain):
         mesh_start = time.time()
         self.fprint("")
         if self.mesh_type == "mshr":
+            raise NotImplementedError("Mshr is no longer supported, use gmsh instead.")
+            # self.fprint("Generating Mesh Using mshr")
 
-            self.fprint("Generating Mesh Using mshr")
+            # ### Create Mesh ###
+            # mshr_circle = Circle(Point(self.center[0],self.center[1]), self.radius, self.nt)
+            # self.mesh = generate_mesh(mshr_circle,self.res)
 
-            ### Create Mesh ###
-            mshr_circle = Circle(Point(self.center[0],self.center[1]), self.radius, self.nt)
-            self.mesh = generate_mesh(mshr_circle,self.res)
 
         elif self.mesh_type == "gmsh":
             self.fprint("Generating Mesh Using gmsh")
@@ -1679,7 +1679,7 @@ class RectangleDomain(GenericDomain):
             import tempfile
 
             # start up gmsh model
-            gmsh.initialize(sys.argv)
+            gmsh.initialize()
             gmsh.model.add("rectmesh")
 
             # true extents
