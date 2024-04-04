@@ -467,6 +467,9 @@ class SteadySolver(GenericSolver):
         diffTurb_elem_int_form = self.nu_T*inner(grad(self.problem.u_k), grad(self.problem.u_k))*CellVolume(self.problem.dom.mesh)
         diffTurb_elem_int = project(diffTurb_elem_int_form, dg0, solver_type="cg", preconditioner_type="jacobi")
         diffTurb_elem_int_file = self.params.Save(diffTurb_elem_int,"diffTurb_elem_int",subfolder="solutions/",val=self.iter_val) # DEBUG!!!!! later, move into Save (see below)
+        diffTot_elem_int_form = (self.problem.viscosity + self.nu_T)*inner(grad(self.problem.u_k), grad(self.problem.u_k))*CellVolume(self.problem.dom.mesh)
+        diffTot_elem_int = project(diffTot_elem_int_form, dg0, solver_type="cg", preconditioner_type="jacobi")
+        diffTot_elem_int_file = self.params.Save(diffTot_elem_int,"diffTot_elem_int",subfolder="solutions/",val=self.iter_val) # DEBUG!!!!! later, move into Save (see below)
 
 
         ### Hack into doflin adjoint to update the local controls at the start of the adjoint solve ###
