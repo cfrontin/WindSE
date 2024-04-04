@@ -52,8 +52,8 @@ def initialize(loc,updated_parameters=[]):
     global StabilizedProblem, TaylorHoodProblem, IterativeSteady, UnsteadyProblem
     from windse.ProblemManager import StabilizedProblem, TaylorHoodProblem, IterativeSteady, UnsteadyProblem
 
-    global SteadySolver, IterativeSteadySolver, UnsteadySolver, MultiAngleSolver, TimeSeriesSolver
-    from windse.SolverManager import SteadySolver, IterativeSteadySolver, UnsteadySolver, MultiAngleSolver, TimeSeriesSolver
+    global SteadySolver, IterativeSteadySolver, UnsteadySolver, MultiAngleSolver, TimeSeriesSolver, AdaptiveSolver
+    from windse.SolverManager import SteadySolver, IterativeSteadySolver, UnsteadySolver, MultiAngleSolver, TimeSeriesSolver, AdaptiveSolver
 
     # TODO:
     # document the aoa.csv and other forces file formats
