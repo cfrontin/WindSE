@@ -2080,6 +2080,56 @@ class MultiAngleSolver(SteadySolver):
             self.orignal_solve()
             self.fprint("Finished Solve {:d} of {:d}".format(i+1,len(self.angles)),special="footer")
 
+class AdaptiveSolver(SteadySolver):
+    """
+    This solver will solve start with a coarse mesh and solve then adapt using a target quantity
+    until stopping criteria.
+
+    Args:
+        problem (:meth:`windse.ProblemManager.GenericProblem`): a windse problem object.
+        angles (list): A list of wind inflow directions.
+    """
+
+    def __init__(self,problem):
+        super(AdaptiveSolver, self).__init__(problem)
+
+        # Store old solve for later use
+        self.orignal_solve = super(AdaptiveSolver, self).Solve
+
+
+
+
+    def Solve(self):
+
+        for i in range(self.max_adapt_iter):
+            self.fprint("Performing Solve {:d}".format(i+1),special="header")
+
+            raise NotImplementedError()
+
+            # solve on current mesh
+            self.orignal_solve()
+
+
+            # check if finished
+            if finished:
+                break
+
+            # extract QOI
+
+            # mark cells for refinement
+
+            # refine 
+
+            # update function space (self.problem.fs)
+
+            # update weak form (self.problem.ComputeFunctional())
+
+            # interpolate to new mesh
+            self.up = interpolate(self.up,new_FS)
+
+            self.fprint("Finished Solve {:d} of {:d}".format(i+1,len(self.angles)),special="footer")
+
+
 class TimeSeriesSolver(SteadySolver):
     """
     This solver will solve the problem using the steady state solver for every

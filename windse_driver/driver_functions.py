@@ -191,6 +191,7 @@ def BuildSolver(params,problem):
                   "iterative_steady":windse.IterativeSteadySolver,
                   "unsteady":windse.UnsteadySolver,
                   "multiangle":windse.MultiAngleSolver,
+                  "adaptive":windse.AdaptiveSolver,
                   "imported_inflow":windse.TimeSeriesSolver}
     solver = solve_dict[params["solver"]["type"]](problem)
 

@@ -947,6 +947,7 @@ properties:
           - "iterative_steady"
           - "unsteady"
           - "multiangle"
+          - "adaptive"
           - "imported_inflow"
       pseudo_steady:
         default: False
@@ -1007,6 +1008,11 @@ properties:
         default: False
         type: "boolean"
         description: "Save fields at every time step."
+      max_adapt_iter:
+        default: Null
+        type: "integer"
+        description: "Max iteration for adaptive mesh refine solve."
+        units: "dimensionless"
   # ================================================================
   optimization:
     type: "object"
