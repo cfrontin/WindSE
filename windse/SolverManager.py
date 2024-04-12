@@ -2093,6 +2093,7 @@ class AdaptiveSolver(SteadySolver):
         angles (list): A list of wind inflow directions.
     """
 
+
     def __init__(self,problem):
         super(AdaptiveSolver, self).__init__(problem)
 
@@ -2104,28 +2105,127 @@ class AdaptiveSolver(SteadySolver):
 
     def Solve(self):
 
+        from windse import LinearFunctionSpace, TaylorHoodFunctionSpace
+        from windse import UniformInflow, PowerInflow, LogLayerInflow, TurbSimInflow
+
         for i in range(self.max_adapt_iter):
             self.fprint("Performing Solve {:d}".format(i+1),special="header")
 
-            raise NotImplementedError()
+            # FUTURE PARAMETERS
+            target_quantity = "diffTot" # TO PARAMS!!!!!
+            percent_tgt = 1.25 # TO PARAMS!!!!!
+            nDOF_limit = 1e4 # TO PARAMS!!!!!
+            nCell_limit = 1e3 # TO PARAMS!!!!!
+
 
             # solve on current mesh
             self.orignal_solve()
 
+            # alias the original mesh and function space
+            mesh = self.problem.dom.mesh
+            fs = self.problem.fs
+
+            # get key count variables
+            nCells = mesh.num_cells()
+            # nEdges = mesh.num_edges()
+            # nFaces = mesh.num_faces()
+            # nFacets = mesh.num_facets()
+            # nVertices = mesh.num_vertices()
+            nDOF = fs.W.dim()
+            nDOFv = fs.V.dim()
+            nDOFq = fs.Q.dim()
+
+            # do a debug print
+            self.fprint(f"Solved on mesh w/ {nCells} cells and {nDOF} DOFs ({nDOFv} on V, {nDOFq} on Q).") # DEBUG!!!!!
 
             # check if finished
+            finished = False
+            finished |= (nDOF > nDOF_limit)
+            finished |= (nDOF > nCell_limit)
             if finished:
                 break
 
             # extract QOI
+            # cheaty hack: load vector based on DG0 space
+
+            # set up dg0 space and dof mappings
+            dg0 = FunctionSpace(self.problem.dom.mesh, "DG", 0)
+            trial0 = TestFunction(dg0)
+            dofmap = dg0.dofmap()
+            dof_to_cell = [cell for cell in range(self.problem.dom.mesh.num_cells()) for dof in dofmap.cell_dofs(cell)]
+
+            # create forms for QoIs
+            form_volume = trial0 # to get volume out
+            form_diffSteady = (self.problem.viscosity)*inner(grad(self.problem.u_k), grad(self.problem.u_k))*trial0 # to get element-wise diffusions
+            form_diffTurb = (self.nu_T)*inner(grad(self.problem.u_k), grad(self.problem.u_k))*trial0 # to get element-wise diffusions
+
+            # integrate the forms
+            elem_int_volume = assemble(form_volume*dx)
+            elem_int_diffSteady = assemble(form_diffSteady*dx)
+            elem_int_diffTurb = assemble(form_diffTurb*dx)
+
+            # stash the results
+            cell2ei_QoI = dict()
+            for idof in range(dg0.dim()):
+                cell2ei_QoI[dof_to_cell[idof]] = {
+                    "volume": elem_int_volume[idof],
+                    "diffSteady": elem_int_diffSteady[idof],
+                    "diffTurb": elem_int_diffTurb[idof],
+                    "diffTot": elem_int_diffSteady[idof] + elem_int_diffTurb[idof],
+            }
 
             # mark cells for refinement
+            keys_ordered = sorted(
+                cell2ei_QoI,
+                key=lambda x: cell2ei_QoI[x][target_quantity],
+                reverse=True,
+            )
+            cell_refine_list = keys_ordered[:int(percent_tgt/100.0*nCells)]
+            cell_f = MeshFunction(
+                'bool',
+                self.problem.dom.mesh,
+                self.problem.dom.mesh.geometry().dim(),
+                False,
+            )
 
-            # refine 
+            for idx_cell, cell in enumerate(cells(self.problem.dom.mesh)):
+                if idx_cell in cell_refine_list:
+                    cell_f[cell] = True
+
+            # refine
+            self.problem.dom.Refine(cell_f)
+
+            # # ???
+            # from driver_functions import BuildProblem, BuildSolver
+            # problem = BuildProblem(self.params, self.problem.dom, self.problem.farm)
+            # # or below...
 
             # update function space (self.problem.fs)
+            func_dict = {"linear": LinearFunctionSpace,
+                        "taylor_hood": TaylorHoodFunctionSpace}
+            fs_old = self.problem.fs
+            fs = func_dict[self.params["function_space"]["type"]](self.problem.dom)
+            self.problem.fs = fs
+            # update boundary conditions
+            bc_dict = {"uniform": UniformInflow,
+                    "power": PowerInflow,
+                    "log": LogLayerInflow,
+                    "turbsim": TurbSimInflow}
+            bc = bc_dict[self.params["boundary_conditions"]["vel_profile"]](self.problem.dom,self.problem.fs,self.problem.farm)
+            self.problem.bc = bc
+
+            # self.u_k,self.p_k = split(self.problem.up_k) # redo split w/ new spaces
+
+            nCells = self.problem.dom.mesh.num_cells()
+            nDOF = self.problem.fs.W.dim()
+            self.fprint(f"Refined mesh w/ {nCells} cells and {nDOF} DOFs.") # DEBUG!!!!!
+
+            self.fprint(f"DEBUG!!!!! dim of Q {self.problem.fs.Q.dim()}")
 
             # update weak form (self.problem.ComputeFunctional())
+            self.problem.ComputeFunctional(self.problem.dom.inflow_angle)
+
+            raise NotImplementedError()
 
             # interpolate to new mesh
             self.up = interpolate(self.up,new_FS)

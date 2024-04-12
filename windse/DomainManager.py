@@ -964,6 +964,24 @@ class BoxDomain(GenericDomain):
 
         if self.mesh_type == "gmsh":
 
+            dirname_for_meshes = ""
+
+            # true extents
+            Lx_true = self.x_range[1] - self.x_range[0]
+            Ly_true = self.y_range[1] - self.y_range[0]
+            Lz_true = self.z_range[1] - self.z_range[0]
+
+            # either do stretching to preserve
+            stretch_anisotropic = True # TODO: turn into an input param
+            if stretch_anisotropic:
+                Lx_prime = 1.0
+                Ly_prime = self.ny/self.nx
+                Lz_prime = self.nz/self.nx
+            else:
+                Lx_prime = Lx_true
+                Ly_prime = Ly_true
+                Lz_prime = Lz_true
+
             if (self.params.rank == 0):
 
                 # only dependencies for the gmsh case
@@ -974,22 +992,6 @@ class BoxDomain(GenericDomain):
                 # start up gmsh model
                 gmsh.initialize()
                 gmsh.model.add("boxmesh")
-
-                # true extents
-                Lx_true = self.x_range[1] - self.x_range[0]
-                Ly_true = self.y_range[1] - self.y_range[0]
-                Lz_true = self.z_range[1] - self.z_range[0]
-
-                # either do stretching to preserve
-                stretch_anisotropic = True # TODO: turn into an input param
-                if stretch_anisotropic:
-                    Lx_prime = 1.0
-                    Ly_prime = self.ny/self.nx
-                    Lz_prime = self.nz/self.nx
-                else:
-                    Lx_prime = Lx_true
-                    Ly_prime = Ly_true
-                    Lz_prime = Lz_true
 
                 # create points that constitute box's lower surface
                 pt_bx000 = gmsh.model.geo.addPoint(
@@ -1063,9 +1065,10 @@ class BoxDomain(GenericDomain):
                     mesh_meshio,
                     file_format="dolfin-xml",
                 )
+                dirname_for_meshes = dir_for_meshes.name
 
             # broadcast the temporary directory for shared use
-            dirname_for_meshes = self.params.comm.bcast(dir_for_meshes.name, root=0)
+            dirname_for_meshes = self.params.comm.bcast(dirname_for_meshes, root=0)
 
             # load the xml into windse
             self.mesh = Mesh(os.path.join(dirname_for_meshes, "dummy.xml"))
