@@ -457,11 +457,8 @@ class GenericDomain(object):
         self.fprint("Marking Cells")
         cell_f = MeshFunction('bool', self.mesh, self.mesh.geometry().dim(),False)
         for idx_cell, cell in enumerate(cells(self.mesh)):
-            # print(f"DEBUG!!!!! cell: {idx_cell} {'in' if idx_cell in cell_refine_list else 'not in'} refine list.")
             if idx_cell in cell_refine_list:
                 cell_f[cell] = True
-            # else:
-            #     cell_f[cell] = False
 
         ### Refine Mesh
         self.Refine(cell_f)
@@ -1290,7 +1287,6 @@ class CylinderDomain(GenericDomain):
 
                 # generate and output
                 gmsh.model.mesh.generate(3)
-                # gmsh.write("dummy.msh") # DEBUG!!!!!
 
                 # create a temporary directory to hold mesh IO files for conversion
                 dir_for_meshes = tempfile.TemporaryDirectory()

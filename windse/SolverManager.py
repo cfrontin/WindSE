@@ -2107,33 +2107,35 @@ class AdaptiveSolver(SteadySolver):
 
         from windse import LinearFunctionSpace, TaylorHoodFunctionSpace
         from windse import UniformInflow, PowerInflow, LogLayerInflow, TurbSimInflow
+        from windse import StabilizedProblem, TaylorHoodProblem, IterativeSteady, UnsteadyProblem
 
         for i in range(self.max_adapt_iter):
+            self.iter_val = i
+
             self.fprint("Performing Solve {:d}".format(i+1),special="header")
 
             # FUTURE PARAMETERS
-            target_quantity = "diffTot" # TO PARAMS!!!!!
-            percent_tgt = 1.25 # TO PARAMS!!!!!
-            nDOF_limit = 1e4 # TO PARAMS!!!!!
-            nCell_limit = 1e3 # TO PARAMS!!!!!
-
+            target_quantity = "diffTurb" # TO PARAMS!!!!!
+            percent_tgt = 2.50 # TO PARAMS!!!!!
+            nDOF_limit = 1e6 # TO PARAMS!!!!!
+            nCell_limit = 1e6 # TO PARAMS!!!!!
 
             # solve on current mesh
             self.orignal_solve()
 
             # alias the original mesh and function space
-            mesh = self.problem.dom.mesh
-            fs = self.problem.fs
+            mesh_orig = self.problem.dom.mesh
+            fs_orig = self.problem.fs
 
             # get key count variables
-            nCells = mesh.num_cells()
-            # nEdges = mesh.num_edges()
-            # nFaces = mesh.num_faces()
-            # nFacets = mesh.num_facets()
-            # nVertices = mesh.num_vertices()
-            nDOF = fs.W.dim()
-            nDOFv = fs.V.dim()
-            nDOFq = fs.Q.dim()
+            nCells = mesh_orig.num_cells()
+            # nEdges = mesh_orig.num_edges()
+            # nFaces = mesh_orig.num_faces()
+            # nFacets = mesh_orig.num_facets()
+            # nVertices = mesh_orig.num_vertices()
+            nDOF = fs_orig.W.dim()
+            nDOFv = fs_orig.V.dim()
+            nDOFq = fs_orig.Q.dim()
 
             # do a debug print
             self.fprint(f"Solved on mesh w/ {nCells} cells and {nDOF} DOFs ({nDOFv} on V, {nDOFq} on Q).") # DEBUG!!!!!
@@ -2143,7 +2145,11 @@ class AdaptiveSolver(SteadySolver):
             finished |= (nDOF > nDOF_limit)
             finished |= (nDOF > nCell_limit)
             if finished:
+                self.fprint("Finished Solve {:d}".format(i+1),special="footer")
                 break
+
+            # stash original solutions
+            up_k_old = self.problem.up_k.copy(deepcopy=True)
 
             # extract QOI
             # cheaty hack: load vector based on DG0 space
@@ -2187,23 +2193,19 @@ class AdaptiveSolver(SteadySolver):
                 self.problem.dom.mesh.geometry().dim(),
                 False,
             )
-
+            targets = 0
             for idx_cell, cell in enumerate(cells(self.problem.dom.mesh)):
                 if idx_cell in cell_refine_list:
                     cell_f[cell] = True
+                    targets += 1
+            self.fprint(f"Marked {targets} cells of {nCells} for refinement.")
 
             # refine
             self.problem.dom.Refine(cell_f)
 
-            # # ???
-            # from driver_functions import BuildProblem, BuildSolver
-            # problem = BuildProblem(self.params, self.problem.dom, self.problem.farm)
-            # # or below...
-
             # update function space (self.problem.fs)
             func_dict = {"linear": LinearFunctionSpace,
                         "taylor_hood": TaylorHoodFunctionSpace}
-            fs_old = self.problem.fs
             fs = func_dict[self.params["function_space"]["type"]](self.problem.dom)
             self.problem.fs = fs
             # update boundary conditions
@@ -2214,23 +2216,25 @@ class AdaptiveSolver(SteadySolver):
             bc = bc_dict[self.params["boundary_conditions"]["vel_profile"]](self.problem.dom,self.problem.fs,self.problem.farm)
             self.problem.bc = bc
 
-            # self.u_k,self.p_k = split(self.problem.up_k) # redo split w/ new spaces
+            prob_dict = {"stabilized": StabilizedProblem,
+                        "steady": StabilizedProblem,
+                        "taylor_hood": TaylorHoodProblem,
+                        "iterative_steady": IterativeSteady,
+                        "unsteady": UnsteadyProblem}
+            problem = prob_dict[self.params["problem"]["type"]](self.problem.dom,self.problem.farm,self.problem.fs,self.problem.bc)#,opt=opt)
+            self.problem = problem
 
             nCells = self.problem.dom.mesh.num_cells()
             nDOF = self.problem.fs.W.dim()
             self.fprint(f"Refined mesh w/ {nCells} cells and {nDOF} DOFs.") # DEBUG!!!!!
 
-            self.fprint(f"DEBUG!!!!! dim of Q {self.problem.fs.Q.dim()}")
-
             # update weak form (self.problem.ComputeFunctional())
             self.problem.ComputeFunctional(self.problem.dom.inflow_angle)
 
-            raise NotImplementedError()
+            # # interpolate to new mesh
+            # up_k_new = project(up_k_old, self.problem.fs, annotate=False)
 
-            # interpolate to new mesh
-            self.up = interpolate(self.up,new_FS)
-
-            self.fprint("Finished Solve {:d} of {:d}".format(i+1,len(self.angles)),special="footer")
+            self.fprint("Finished Solve {:d}".format(i+1),special="footer")
 
 
 class TimeSeriesSolver(SteadySolver):

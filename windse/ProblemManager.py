@@ -193,11 +193,7 @@ class GenericProblem(object):
                 numer = vonKarman*depth
                 denom = 1.0 + vonKarman*depth/self.lmax
 
-                self.fprint(f"DEBUG!!!!! numer size: {numer.shape}")
-                self.fprint(f"DEBUG!!!!! denom size: {denom.shape}")
-
                 l_mix = Function(self.fs.Q)
-                self.fprint(f"DEBUG!!!!! l_mix.vector size: {l_mix.vector().size()}")
                 l_mix.vector()[:] = numer/denom
                 l_mix.rename("l_mix","l_mix")
 
