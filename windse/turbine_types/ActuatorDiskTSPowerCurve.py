@@ -10,14 +10,14 @@ from . import ActuatorDisk
 import numpy as np
 from scipy.special import gamma
 
-class ActuatorDiskSimplePowerCurve(GenericTurbine):
+class ActuatorDiskTSPowerCurve(GenericTurbine):
 
     def __init__(self, i, x, y, dom, imported_params=None):
         # Define the acceptable column of an wind_farm.csv imput file
         self.yaml_inputs = ["HH", "RD", "yaw", "thickness", "CTprime0", "CPprime0", "Vrated", "force"]
 
         # Init turbine
-        super(ActuatorDiskSimplePowerCurve, self).__init__(i,x,y,dom,imported_params)
+        super(ActuatorDiskTSPowerCurve, self).__init__(i,x,y,dom,imported_params)
 
     def load_parameters(self):
         self.HH        = self.params["turbines"]["HH"]
@@ -28,6 +28,7 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         self.CPprime0  = self.params["turbines"]["CPprime0"]
         self.CTprime0  = self.params["turbines"]["CTprime0"]
         self.Prated    = self.params["turbines"]["Prated"]
+        self.Trated    = self.params["turbines"]["Trated"]
         self.force     = self.params["turbines"]["force"]
 
     def create_controls(self):
@@ -37,9 +38,10 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         self.mCPprime0 = Constant(self.CPprime0, name="CPprime0_{:d}".format(self.index))
         self.mCTprime0 = Constant(self.CTprime0, name="CTprime0_{:d}".format(self.index))
         self.mPrated   = Constant(self.Prated, name="Prated_{:d}".format(self.index))
+        self.mTrated   = Constant(self.Trated, name="Trated_{:d}".format(self.index))
 
         # The control list is very important for extracting information from the optimzation step.
-        self.controls_list = ["x","y","yaw","CPprime0","CTprime0","Prated","Vrated"]
+        self.controls_list = ["x","y","yaw","CPprime0","CTprime0","Prated","Trated"]
 
     def build_actuator_disk(self):
 
@@ -143,8 +145,10 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         CPprime0 = self.mCPprime0
         CTprime0 = self.mCTprime0
         Prated = self.mPrated
+        Trated = self.mTrated
+        Vrated = Prated*CTprime0/(Trated*CPprime0)
         A = np.pi/4.0*self.RD**2.0
-        Vrated3 = Prated/(0.5*CPprime0*A) # cubed rated velo
+        Vps = sqrt(2*Prated/(A*Vrated*CPprime0))
 
         # precompute key values
         beta_smooth = 16.0
@@ -152,9 +156,10 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
 
         f0 = (0.5*A*vel_magnitude**3)/1e6
         f1 = (0.5*A*vel_magnitude**3)*CTprime0/1e6
-        f2 = (0.5*A*vel_magnitude**3)*CTprime0*Vrated3/(vel_magnitude**3)/1e6
+        f2 = (0.5*A*vel_magnitude**3)*CTprime0*Vps**2/(vel_magnitude**2)/1e6
+        f3 = (0.5*A*vel_magnitude**3)*CTprime0*Vps**2*Vrated/(vel_magnitude**3)/1e6
 
-        # smooth once: one in power space and one in coefficient space
+        # smooth twice: one in power space and one in coefficient space
 
         # # first attempt: boltzmann operator
         # # first blend: smoothmin Region II.5 and Region III power
@@ -172,8 +177,8 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         # )
 
         # second attempt: mellowmax operator
-        # first blend: justRegion III power
-        blend1 = f2
+        # first blend: smoothmin Region II.5 and Region III power
+        blend1 = -1.0/beta_smooth*ln(exp(-beta_smooth*f2) + exp(-beta_smooth*f3))
 
         # second blend: smoothmin Region II and first blend coefficient
         CTp_factor = -1.0/beta_smooth*ln(

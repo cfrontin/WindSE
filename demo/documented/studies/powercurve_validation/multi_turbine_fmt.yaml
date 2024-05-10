@@ -31,7 +31,7 @@ domain:
 
     ########################### Box Domain ############################
     type: box              #                       |
-    x_range: [-390, 1950]   # x-range of the domain | m          1950, 2340, 2730, 3120, 3510
+    x_range: [-390, 1950]  # x-range of the domain | m          1950, 2340, 2730, 3120, 3510
     y_range: [-390, 390]   # y-range of the domain | m
     z_range: [0.04, 520]   # z-range of the domain | m
     nx: 54                 # Number of x-nodes     | -          54, 63, 72, 81, 90
