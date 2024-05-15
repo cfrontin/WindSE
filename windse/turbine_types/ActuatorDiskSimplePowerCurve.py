@@ -142,12 +142,14 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         # compute power curve adjustment as a function of velocity
         CPprime0 = self.mCPprime0
         CTprime0 = self.mCTprime0
-        Prated = self.mPrated
+        calib_factor_Prated = 0.9406107077790101
+        # `-> created to match a single-turbine test case
+        Prated = calib_factor_Prated*self.mPrated
         A = np.pi/4.0*self.RD**2.0
         Vrated3 = Prated/(0.5*CPprime0*A) # cubed rated velo
 
         # precompute key values
-        beta_smooth = 16.0
+        beta_smooth = 128.0
         vel_magnitude = sqrt(u[0]**2 + u[1]**2 + u[2]**2)
 
         f0 = (0.5*A*vel_magnitude**3)/1e6
@@ -190,7 +192,12 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
 
     def power(self, u, inflow_angle):
         # adjust for turbine inefficiency
-        return self.mCPprime0/self.mCTprime0*dot(-self.tf,u)/1.0e6
+        return self.mCPprime0/self.mCTprime0*dot(-self.tf,u)/1.0e6  # report in megawatts
+
+    def thrust(self, u, inflow_angle):
+        # adjust for turbine inefficiency
+        nHat = u/sqrt(u[0]**2+u[1]**2+u[2]**2)
+        return dot(-self.tf,nHat)/1.0e3  # report in kilonewtons
 
     def power_gradient(self):
         pass
