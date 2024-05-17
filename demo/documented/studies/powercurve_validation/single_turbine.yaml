@@ -1,14 +1,14 @@
-general: 
+general:
     name: 3D_Wind_Farm      # Name of the output folder
     output: ["mesh","initial_guess","height","turbine_force","solution"]
 
-wind_farm: 
+wind_farm:
 
     ######################### Grid Wind Farm #########################
     type: grid            #                          |
     grid_rows: 1          # Number of rows           | -
     grid_cols: 1          # Number of columns        | -
-    x_spacing: 0          # horizontal spacing       | m 
+    x_spacing: 0          # horizontal spacing       | m
     y_spacing: 0          # vertical spacing         | m
     ###################################################################
 
@@ -27,16 +27,16 @@ turbines:
     yaw: 0.0              # Yaw                       | rads
     ###################################################################
 
-domain: 
+domain:
 
     ########################### Box Domain ############################
     type: box              #                       |
-    x_range: [-390, 780]    # x-range of the domain | m 
+    x_range: [-390, 780]    # x-range of the domain | m
     y_range: [-390, 390]   # y-range of the domain | m
     z_range: [0.04, 520]   # z-range of the domain | m
-    nx: 27                 # Number of x-nodes     | - 
-    ny: 18                 # Number of y-nodes     | -
-    nz: 9                  # Number of z-nodes     | -
+    nx: 27 # 19 # 27 # 38 # 54  # Number of x-nodes     | -
+    ny: 18 # 13 # 18 # 25 # 36  # Number of y-nodes     | -
+    nz:  9 #  6 #  9 # 13 # 18  # Number of z-nodes     | -
     ###################################################################
 
 refine:
@@ -46,7 +46,7 @@ refine:
     refine_custom:
         1:
             type: box
-            x_range: [-130, 130] 
+            x_range: [-130, 130]
             y_range: [-130, 130]
             z_range: [0, 240]
     turbine_num: 1         # number of turbine refinements| -
@@ -69,3 +69,4 @@ problem:
 solver:
     type: steady
     save_power: true
+    save_thrust: true
