@@ -31,9 +31,9 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         self.force     = self.params["turbines"]["force"]
 
         # calibration factors
-        self.calibration_factor_CTprime0 = 0.668301024771097  # based on single-turbine thrust-power-curve calibration
+        self.calibration_factor_CTprime0 = 1.0 # 0.872882971129596  # based on single-turbine thrust-power-curve calibration
         self.calibration_factor_CPprime0 = 1.0  # based on single-turbine thrust-power-curve calibration
-        self.calibration_factor_Prated = 1.0 # 1.4103745914175012  # based on single-turbine thrust-power-curve calibration
+        self.calibration_factor_Prated = 1.0  # based on single-turbine thrust-power-curve calibration
         self.calibration_factor_CPprime0 = 1.0 # 0.8777933671305554  # based on single-turbine thrust-power-curve calibration
 
     def create_controls(self):
@@ -90,7 +90,7 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
             # self._setup_chord_force()
             # chord = self.mchord[i]
             # force = self.radial_chord_force(r,chord)
-        F = -0.5*A*self.calibration_factor_CTprime0*CTprime0*force
+        F = -0.5*A*(self.calibration_factor_CTprime0*CTprime0)*force
 
         ### Calculate normalization constant ###
         volNormalization = T_norm*D_norm*W*R**(self.dom.dim-1)
@@ -157,9 +157,7 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         beta_smooth = 128.0
         vel_magnitude = sqrt(u[0]**2 + u[1]**2 + u[2]**2)
 
-        f0 = (0.5*A*vel_magnitude**3)/1e6
-        f1 = (0.5*A*vel_magnitude**3)*CTprime0/1e6
-        f2 = (0.5*A)*self.calibration_factor_CTprime0*CTprime0*Vrated3/1e6
+        f2 = Vrated3/(vel_magnitude**3)
 
         # smooth once: one in power space and one in coefficient space
 
@@ -178,14 +176,14 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         #     exp(-beta_smooth*f1/f0) + exp(-beta_smooth*blend1/f0)
         # )
 
-        # second attempt: mellowmax operator
-        # first blend: justRegion III power
-        blend1 = f2
+        # # second attempt: mellowmax operator
+        # # first blend: justRegion III power
+        # blend1 = f2
 
         # second blend: smoothmin Region II and first blend coefficient
         CTp_factor = -1.0/beta_smooth*ln(
-            exp(-beta_smooth*f1/f0) + exp(-beta_smooth*blend1/f0)
-        )/CTprime0
+            exp(-beta_smooth) + exp(-beta_smooth*f2)
+        )
 
         ### Compose full turbine force
         self.tf = CTp_factor*(self.tf1*u[0]**2+self.tf2*u[1]**2+self.tf3*u[0]*u[1])
@@ -197,7 +195,7 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
 
     def power(self, u, inflow_angle):
         # adjust for turbine inefficiency
-        return self.calibration_factor_CPprime0*self.mCPprime0/(self.mCTprime0)*dot(-self.tf,u)/1.0e6  # report in megawatts
+        return self.calibration_factor_CPprime0*self.mCPprime0/(self.calibration_factor_CTprime0*self.mCTprime0)*dot(-self.tf,u)/1.0e6  # report in megawatts
 
     def thrust(self, u, inflow_angle):
         # adjust for turbine inefficiency

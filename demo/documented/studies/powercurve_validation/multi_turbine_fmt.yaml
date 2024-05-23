@@ -8,7 +8,7 @@ wind_farm:
     type: grid            #                          |
     grid_rows: 1          # Number of rows           | -
     grid_cols: 3          # Number of columns        | -
-    x_spacing: 390        # horizontal spacing       | m      390, 520, 650, 780, 910
+    x_spacing: 910        # horizontal spacing       | m      390, 520, 650, 780, 910
     y_spacing: 0          # vertical spacing         | m
     ###################################################################
 
@@ -23,7 +23,7 @@ turbines:
     Prated: 3077551.02040 # Specific Rated Power      | W
     Trated: 368163.26530  # Specific Thrust           | N
     force: sine           # radial force distribution | -
-    HH: 110               # Hub Height                | m
+    HH: 110.0             # Hub Height                | m
     yaw: 0.0              # Yaw                       | rads
     ###################################################################
 
@@ -31,10 +31,10 @@ domain:
 
     ########################### Box Domain ############################
     type: box              #                       |
-    x_range: [-390, 1950]  # x-range of the domain | m          1950, 2340, 2730, 3120, 3510
+    x_range: [-390, 3510]  # x-range of the domain | m          1950, 2340, 2730, 3120, 3510
     y_range: [-390, 390]   # y-range of the domain | m
     z_range: [0.04, 520]   # z-range of the domain | m
-    nx: 54                 # Number of x-nodes     | -          54, 63, 72, 81, 90
+    nx: 90                 # Number of x-nodes     | -          54, 63, 72, 81, 90
     ny: 18                 # Number of y-nodes     | -
     nz: 9                  # Number of z-nodes     | -
     ###################################################################
@@ -46,7 +46,7 @@ refine:
     refine_custom:
         1:
             type: box
-            x_range: [-130, 1300] # 1300, 1690, 2080, 2470, 2860
+            x_range: [-130, 2860] # 1300, 1690, 2080, 2470, 2860
             y_range: [-130, 130]
             z_range: [0, 240]
     turbine_num: 1         # number of turbine refinements| -

@@ -5,6 +5,10 @@
 In this study, we will validate the power curve behavior in isolation and with multiple inline turbines.
 We consider the discretization dependence of the `WindSE` results, and the comparison of `WindSE` power estimates compared to other tools.
 
+## Tuning methodology
+
+Using the `IEA-3.4MW-130m` turbine, we run a validation study across
+
 ## Single turbine: discretization dependence
 
 In this section we compare the `WindSE` results to the canonical IEA 3.4MW 130m turbine's power curve that is an input to `FLORIS`.

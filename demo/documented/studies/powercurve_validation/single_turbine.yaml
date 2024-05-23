@@ -18,8 +18,12 @@ turbines:
     type: power_disk      #                           |
     RD: 130.0             # Turbine Diameter          | m
     thickness: 13.0       # Effective Thickness       | m
-    CPprime0: 1.360       # Region 2 Power Coeff      | -
-    CTprime0: 1.639       # Region 2 Thrust Coeff     | -
+    CPprime0: 1.043       # Region 2 Power Coeff      | -
+    # CPprime0: 1.360       # Region 2 Power Coeff      | -
+    CTprime0: 1.319       # Region 2 Thrust Coeff     | -
+    # CTprime0: 1.350       # Region 2 Thrust Coeff     | -
+    # CTprime0: 1.431       # Region 2 Thrust Coeff     | -
+    # CTprime0: 1.639       # Region 2 Thrust Coeff     | -
     Prated: 3077551.02040 # Specific Rated Power      | W
     Trated: 368163.26530  # Specific Thrust           | N
     force: sine           # radial force distribution | -
@@ -34,9 +38,9 @@ domain:
     x_range: [-390, 780]    # x-range of the domain | m
     y_range: [-390, 390]   # y-range of the domain | m
     z_range: [0.04, 520]   # z-range of the domain | m
-    nx: 27 # 19 # 27 # 38 # 54  # Number of x-nodes     | -
-    ny: 18 # 13 # 18 # 25 # 36  # Number of y-nodes     | -
-    nz:  9 #  6 #  9 # 13 # 18  # Number of z-nodes     | -
+    nx: 54 # 19 # 27 # 38 # 54  # Number of x-nodes     | -
+    ny: 36 # 13 # 18 # 25 # 36  # Number of y-nodes     | -
+    nz: 18 #  6 #  9 # 13 # 18  # Number of z-nodes     | -
     ###################################################################
 
 refine:
