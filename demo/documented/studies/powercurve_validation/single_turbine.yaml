@@ -18,7 +18,8 @@ turbines:
     type: power_disk      #                           |
     RD: 130.0             # Turbine Diameter          | m
     thickness: 13.0       # Effective Thickness       | m
-    CPprime0: 1.043       # Region 2 Power Coeff      | -
+    CPprime0: 1.022       # Region 2 Power Coeff      | -
+    # CPprime0: 1.043       # Region 2 Power Coeff      | -
     # CPprime0: 1.360       # Region 2 Power Coeff      | -
     CTprime0: 1.319       # Region 2 Thrust Coeff     | -
     # CTprime0: 1.350       # Region 2 Thrust Coeff     | -
