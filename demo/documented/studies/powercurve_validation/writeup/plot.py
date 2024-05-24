@@ -24,18 +24,21 @@ do_multi_turbine=False
 
 if do_single_turbine:
   # extract three levels of discretization
-  df_power_lo = pd.read_csv("../pc_nx19ny13nz06.csv", names=["V","P"])
-  df_thrust_lo = pd.read_csv("../tc_nx19ny13nz06.csv", names=["V","Tf"])
+  casename = "kestrel_nx19ny13nz06" # "nx19ny13nz06"
+  df_power_lo = pd.read_csv(f"../pc_{casename}.csv", names=["V","P"])
+  df_thrust_lo = pd.read_csv(f"../tc_{casename}.csv", names=["V","Tf"])
   df_power_collection = [df_power_lo]
   df_thrust_collection = [df_thrust_lo]
-  # df_power_mid = pd.read_csv("../pc_nx27ny18nz09.csv", names=["V","P"])
-  # df_thrust_mid = pd.read_csv("../tc_nx27ny18nz09.csv", names=["V","Tf"])
-  # df_power_collection = [df_power_lo, df_power_mid]
-  # df_thrust_collection = [df_thrust_lo, df_thrust_mid]
-  # df_power_hi = pd.read_csv("../pc_nx38ny25nz13.csv", names=["V","P"])
-  # df_thrust_hi = pd.read_csv("../tc_nx38ny25nz13.csv", names=["V","Tf"])
-  # df_power_collection = [df_power_lo, df_power_mid, df_power_hi]
-  # df_thrust_collection = [df_thrust_lo, df_thrust_mid, df_thrust_hi]
+  casename = "kestrel_nx27ny18nz09" # "nx27ny18nz09"
+  df_power_mid = pd.read_csv(f"../pc_{casename}.csv", names=["V","P"])
+  df_thrust_mid = pd.read_csv(f"../tc_{casename}.csv", names=["V","Tf"])
+  df_power_collection = [df_power_lo, df_power_mid]
+  df_thrust_collection = [df_thrust_lo, df_thrust_mid]
+  casename = "kestrel_nx38ny25nz13" # "nx38ny25nz13"
+  df_power_hi = pd.read_csv(f"../pc_{casename}.csv", names=["V","P"])
+  df_thrust_hi = pd.read_csv(f"../tc_{casename}.csv", names=["V","Tf"])
+  df_power_collection = [df_power_lo, df_power_mid, df_power_hi]
+  df_thrust_collection = [df_thrust_lo, df_thrust_mid, df_thrust_hi]
 
   # get FLORIS reference data
   rho_fluid = 1.225
@@ -56,9 +59,9 @@ if do_single_turbine:
 
   fig, ax = plt.subplots()
 
-  ax.plot(df_power_lo.V, df_power_lo.P, label="$N_x=19$, $N_y=13$, $N_z=6$")
-  # ax.plot(df_power_mid.V, df_power_mid.P, label="$N_x=27$, $N_y=18$, $N_z=9$")
-  # ax.plot(df_power_hi.V, df_power_hi.P, label="$N_x=38$, $N_y=25$, $N_z=13$")
+  ax.plot(df_power_lo.V, rho_fluid*df_power_lo.P, label="$N_x=19$, $N_y=13$, $N_z=6$")
+  ax.plot(df_power_mid.V, rho_fluid*df_power_mid.P, label="$N_x=27$, $N_y=18$, $N_z=9$")
+  ax.plot(df_power_hi.V, rho_fluid*df_power_hi.P, label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris,
     P_floris/1e3,
@@ -75,7 +78,7 @@ if do_single_turbine:
     label="IEA-3.4MW-130m: $\\min(\\frac{1}{2} C_P A V^3, P_{\\mathrm{rated}}/\\rho)$"
   )
   ax.set_xlabel("hub-height farfield velocity, $V$ (m/s)")
-  ax.set_ylabel("specific turbine power, $P(V)/\\rho$ ($10^6$ m$^5$/s$^3$)")
+  ax.set_ylabel("turbine power, $P(V)$ (MW)")
   ax.legend()
   fig.savefig("single_turb_Pconv.png", dpi=300, bbox_inches="tight")
 
@@ -84,8 +87,8 @@ if do_single_turbine:
   fig, ax = plt.subplots()
 
   ax.plot(df_power_lo.V, rho_fluid*df_power_lo.P/Ps_fluid(df_power_lo.V), label="$N_x=19$, $N_y=13$, $N_z=6$")
-  # ax.plot(df_power_mid.V, rho_fluid*df_power_mid.P/Ps_fluid(df_power_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
-  # ax.plot(df_power_hi.V, rho_fluid*df_power_hi.P/Ps_fluid(df_power_hi.V), label="$N_x=38$, $N_y=25$, $N_z=13$")
+  ax.plot(df_power_mid.V, rho_fluid*df_power_mid.P/Ps_fluid(df_power_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
+  ax.plot(df_power_hi.V, rho_fluid*df_power_hi.P/Ps_fluid(df_power_hi.V), label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris[1:],
     P_floris[1:]/1e3/Ps_fluid(V_floris[1:]),
@@ -111,8 +114,8 @@ if do_single_turbine:
   fig, ax = plt.subplots()
 
   ax.plot(df_thrust_lo.V, rho_fluid*df_thrust_lo.Tf, label="$N_x=19$, $N_y=13$, $N_z=6$")
-  # ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf, label="$N_x=27$, $N_y=18$, $N_z=9$")
-  # ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.Tf, label="$N_x=38$, $N_y=25$, $N_z=13$")
+  ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf, label="$N_x=27$, $N_y=18$, $N_z=9$")
+  ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.Tf, label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris,
     CT_floris*Ts_fluid(V_floris),
@@ -120,7 +123,7 @@ if do_single_turbine:
     label="IEA-3.4MW-130m reference",
   )
   ax.set_xlabel("hub-height farfield velocity, $V$ (m/s)")
-  ax.set_ylabel("specific turbine thrust, $T(V)/\\rho$ ($10^3$ m$^4$/s$^2$)")
+  ax.set_ylabel("turbine thrust, $T(V)$ (kN)")
   ax.legend()
   fig.savefig("single_turb_Tconv.png", dpi=300, bbox_inches="tight")
 
@@ -129,8 +132,8 @@ if do_single_turbine:
   fig, ax = plt.subplots()
 
   ax.plot(df_thrust_lo.V, rho_fluid*df_thrust_lo.Tf/Ts_fluid(df_thrust_lo.V), label="$N_x=19$, $N_y=13$, $N_z=6$")
-  # ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf/Ts_fluid(df_thrust_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
-  # ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.T, label="$N_x=38$, $N_y=25$, $N_z=13$")
+  ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf/Ts_fluid(df_thrust_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
+  ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.Tf/Ts_fluid(df_thrust_hi.V), label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris,
     CT_floris,

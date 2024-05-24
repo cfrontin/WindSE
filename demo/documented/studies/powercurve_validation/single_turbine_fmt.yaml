@@ -25,7 +25,8 @@ turbines:
     # CTprime0: 1.350       # Region 2 Thrust Coeff     | -
     # CTprime0: 1.431       # Region 2 Thrust Coeff     | -
     # CTprime0: 1.639       # Region 2 Thrust Coeff     | -
-    Prated: 3077551.02040 # Specific Rated Power      | W
+    Prated: 2716901.62246 # Specific Rated Power      | W
+    # Prated: 3077551.02040 # Specific Rated Power      | W
     Trated: 368163.26530  # Specific Thrust           | N
     force: sine           # radial force distribution | -
     HH: 110.0             # Hub Height                | m

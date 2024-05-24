@@ -51,7 +51,6 @@ mb_P = np.polyfit(
 Tf_inf_est = rho_fluid*df_data.Tf + df_data.dx_elem**mb_Tf[0] * 10**mb_Tf[1]
 signpattern_P = np.ones_like(df_data.dx_elem) # np.array([1.0, 1.0, 1.0, 1.0])
 P_inf_est = rho_fluid*df_data.P + signpattern_P*df_data.dx_elem**mb_P[0] * 10**mb_P[1]
-# Tf_inf_est = rho_fluid*df_data.Tf - df_data.dx_elem**mb[0] * 10**mb[1]
 
 # plot the convergence behavior for validation
 fig, axes = plt.subplots(2, sharex=True)
