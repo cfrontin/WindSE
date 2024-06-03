@@ -9,8 +9,8 @@ import seaborn as sns
 plt.style.use(
     [
         "dark_background",
-        "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_cvf.mplstyle",
-        "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_nrel.mplstyle",
+        # "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_cvf.mplstyle",
+        # "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_nrel.mplstyle",
     ]
 )
 
@@ -25,20 +25,19 @@ do_multi_turbine=False
 if do_single_turbine:
   # extract three levels of discretization
   casename = "kestrel_nx19ny13nz06" # "nx19ny13nz06"
-  df_power_lo = pd.read_csv(f"../pc_{casename}.csv", names=["V","P"])
-  df_thrust_lo = pd.read_csv(f"../tc_{casename}.csv", names=["V","Tf"])
-  df_power_collection = [df_power_lo]
-  df_thrust_collection = [df_thrust_lo]
+  df_curves_lo = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
+  df_curves_collection = [df_curves_lo]
   casename = "kestrel_nx27ny18nz09" # "nx27ny18nz09"
-  df_power_mid = pd.read_csv(f"../pc_{casename}.csv", names=["V","P"])
-  df_thrust_mid = pd.read_csv(f"../tc_{casename}.csv", names=["V","Tf"])
-  df_power_collection = [df_power_lo, df_power_mid]
-  df_thrust_collection = [df_thrust_lo, df_thrust_mid]
-  casename = "kestrel_nx38ny25nz13" # "nx38ny25nz13"
-  df_power_hi = pd.read_csv(f"../pc_{casename}.csv", names=["V","P"])
-  df_thrust_hi = pd.read_csv(f"../tc_{casename}.csv", names=["V","Tf"])
-  df_power_collection = [df_power_lo, df_power_mid, df_power_hi]
-  df_thrust_collection = [df_thrust_lo, df_thrust_mid, df_thrust_hi]
+  df_curves_mid = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
+  df_curves_collection = [df_curves_lo, df_curves_mid]
+  # casename = "kestrel_nx38ny25nz13" # "nx38ny25nz13"
+  # df_curves_hi = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
+  # df_curves_collection = [df_curves_lo, df_curves_mid, df_curves_hi]
+  label_collection = [
+    "$N_x=19$, $N_y=13$, $N_z=6$",
+    "$N_x=27$, $N_y=18$, $N_z=9$",
+    "$N_x=38$, $N_y=25$, $N_z=13$",
+  ]
 
   # get FLORIS reference data
   rho_fluid = 1.225
@@ -47,7 +46,7 @@ if do_single_turbine:
   Ts_fluid = lambda V: 0.5*rho_fluid*A_rotor*V**2/1e3  # kN
   Ps_fluid = lambda V: 0.5*rho_fluid*A_rotor*V**3/1e6  # MW
 
-  maxV = np.max([np.max(df) for df in df_power_collection])
+  maxV = np.max([np.max(df.V) for df in df_curves_collection])
   V_floris = np.array(data_FLORIS["power_thrust_table"]["wind_speed"])[data_FLORIS["power_thrust_table"]["wind_speed"] <= maxV]
   P_floris = np.array(data_FLORIS["power_thrust_table"]["power"])[data_FLORIS["power_thrust_table"]["wind_speed"] <= maxV]
   Vrated_floris = 9.812675420388173
@@ -59,9 +58,11 @@ if do_single_turbine:
 
   fig, ax = plt.subplots()
 
-  ax.plot(df_power_lo.V, rho_fluid*df_power_lo.P, label="$N_x=19$, $N_y=13$, $N_z=6$")
-  ax.plot(df_power_mid.V, rho_fluid*df_power_mid.P, label="$N_x=27$, $N_y=18$, $N_z=9$")
-  ax.plot(df_power_hi.V, rho_fluid*df_power_hi.P, label="$N_x=38$, $N_y=25$, $N_z=13$")
+  for df_power, label_case in zip(df_curves_collection, label_collection):
+    ax.plot(df_power.V, rho_fluid*df_power.P, label=label_case)
+  # ax.plot(df_power_lo.V, rho_fluid*df_power_lo.P, label="$N_x=19$, $N_y=13$, $N_z=6$")
+  # ax.plot(df_power_mid.V, rho_fluid*df_power_mid.P, label="$N_x=27$, $N_y=18$, $N_z=9$")
+  # ax.plot(df_power_hi.V, rho_fluid*df_power_hi.P, label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris,
     P_floris/1e3,
@@ -86,9 +87,11 @@ if do_single_turbine:
 
   fig, ax = plt.subplots()
 
-  ax.plot(df_power_lo.V, rho_fluid*df_power_lo.P/Ps_fluid(df_power_lo.V), label="$N_x=19$, $N_y=13$, $N_z=6$")
-  ax.plot(df_power_mid.V, rho_fluid*df_power_mid.P/Ps_fluid(df_power_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
-  ax.plot(df_power_hi.V, rho_fluid*df_power_hi.P/Ps_fluid(df_power_hi.V), label="$N_x=38$, $N_y=25$, $N_z=13$")
+  for df_power, label_case in zip(df_curves_collection, label_collection):
+    ax.plot(df_power.V, rho_fluid*df_power.P/Ps_fluid(df_power.V), label=label_case)
+  # ax.plot(df_power_lo.V, rho_fluid*df_power_lo.P/Ps_fluid(df_power_lo.V), label="$N_x=19$, $N_y=13$, $N_z=6$")
+  # ax.plot(df_power_mid.V, rho_fluid*df_power_mid.P/Ps_fluid(df_power_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
+  # ax.plot(df_power_hi.V, rho_fluid*df_power_hi.P/Ps_fluid(df_power_hi.V), label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris[1:],
     P_floris[1:]/1e3/Ps_fluid(V_floris[1:]),
@@ -109,13 +112,30 @@ if do_single_turbine:
   ax.legend()
   fig.savefig("single_turb_CPconv.png", dpi=300, bbox_inches="tight")
 
+  fig, ax = plt.subplots()
+
+  for df_power, label_case in zip(df_curves_collection, label_collection):
+    ax.plot(
+      df_power.V,
+      (
+        rho_fluid*df_power.P/Ps_fluid(df_power.V)
+      )/np.interp(
+        df_power.V,
+        V_floris[1:],
+        P_floris[1:]/1e3/Ps_fluid(V_floris[1:]),
+      ),
+      label=label_case,
+    )
+
   ## thrust plot
 
   fig, ax = plt.subplots()
 
-  ax.plot(df_thrust_lo.V, rho_fluid*df_thrust_lo.Tf, label="$N_x=19$, $N_y=13$, $N_z=6$")
-  ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf, label="$N_x=27$, $N_y=18$, $N_z=9$")
-  ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.Tf, label="$N_x=38$, $N_y=25$, $N_z=13$")
+  for df_thrust, label_case in zip(df_curves_collection, label_collection):
+    ax.plot(df_thrust.V, rho_fluid*df_thrust.Tf, label=label_case)
+  # ax.plot(df_thrust_lo.V, rho_fluid*df_thrust_lo.Tf, label="$N_x=19$, $N_y=13$, $N_z=6$")
+  # ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf, label="$N_x=27$, $N_y=18$, $N_z=9$")
+  # ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.Tf, label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris,
     CT_floris*Ts_fluid(V_floris),
@@ -131,9 +151,11 @@ if do_single_turbine:
 
   fig, ax = plt.subplots()
 
-  ax.plot(df_thrust_lo.V, rho_fluid*df_thrust_lo.Tf/Ts_fluid(df_thrust_lo.V), label="$N_x=19$, $N_y=13$, $N_z=6$")
-  ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf/Ts_fluid(df_thrust_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
-  ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.Tf/Ts_fluid(df_thrust_hi.V), label="$N_x=38$, $N_y=25$, $N_z=13$")
+  for df_thrust, label_case in zip(df_curves_collection, label_collection):
+    ax.plot(df_thrust.V, rho_fluid*df_thrust.Tf/Ts_fluid(df_thrust.V), label=label_case)
+  # ax.plot(df_thrust_lo.V, rho_fluid*df_thrust_lo.Tf/Ts_fluid(df_thrust_lo.V), label="$N_x=19$, $N_y=13$, $N_z=6$")
+  # ax.plot(df_thrust_mid.V, rho_fluid*df_thrust_mid.Tf/Ts_fluid(df_thrust_mid.V), label="$N_x=27$, $N_y=18$, $N_z=9$")
+  # ax.plot(df_thrust_hi.V, rho_fluid*df_thrust_hi.Tf/Ts_fluid(df_thrust_hi.V), label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris,
     CT_floris,
@@ -151,15 +173,15 @@ if do_single_turbine:
 
 if do_multi_turbine:
   # extract three levels of discretization
-  # df_lo = pd.read_csv("../pc_nx19ny13nz06.csv", names=["V","P"])
+  # df_lo = pd.read_csv("../curves_nx19ny13nz06.csv", names=["V","P"])
   # # df_collection = [df_lo]
-  df_power_mid = pd.read_csv("../pc_multi.csv", names=["V","Ptot","P1","P2","P3"])
-  df_power_collection = [df_power_mid]
-  # df_hi = pd.read_csv("../pc_nx38ny25nz13.csv", names=["V","P"])
+  df_curves_mid = pd.read_csv("../curves_multi.csv", names=["V","Ptot","P1","P2","P3"])
+  df_curves_collection = [df_curves_mid]
+  # df_hi = pd.read_csv("../curves_nx38ny25nz13.csv", names=["V","P"])
   # df_collection = [df_lo, df_mid, df_hi]
 
   # get FLORIS reference data
-  maxV = np.max([np.max(df) for df in df_power_collection])
+  maxV = np.max([np.max(df) for df in df_curves_collection])
   V_floris = np.array(data_FLORIS["power_thrust_table"]["wind_speed"])[data_FLORIS["power_thrust_table"]["wind_speed"] <= maxV]
   P_floris = np.array(data_FLORIS["power_thrust_table"]["power"])[data_FLORIS["power_thrust_table"]["wind_speed"] <= maxV]
   Vrated_floris = 9.812675420388173
@@ -175,10 +197,10 @@ if do_multi_turbine:
   fig, ax = plt.subplots()
 
   # ax.plot(df_lo.V, df_lo.P, label="$N_x=19$, $N_y=13$, $N_z=6$")
-  pt0 = ax.plot(df_power_mid.V, df_power_mid.Ptot/3, label="mid mesh, average")
-  ax.plot(df_power_mid.V, df_power_mid.P1, "--", c= pt0[-1].get_color(), label="mid mesh, T1")
-  ax.plot(df_power_mid.V, df_power_mid.P2, "--", c= pt0[-1].get_color(), label="mid mesh, T2")
-  ax.plot(df_power_mid.V, df_power_mid.P3, "--", c= pt0[-1].get_color(), label="mid mesh, T3")
+  pt0 = ax.plot(df_curves_mid.V, df_curves_mid.Ptot/3, label="mid mesh, average")
+  ax.plot(df_curves_mid.V, df_curves_mid.P1, "--", c= pt0[-1].get_color(), label="mid mesh, T1")
+  ax.plot(df_curves_mid.V, df_curves_mid.P2, "--", c= pt0[-1].get_color(), label="mid mesh, T2")
+  ax.plot(df_curves_mid.V, df_curves_mid.P3, "--", c= pt0[-1].get_color(), label="mid mesh, T3")
   # ax.plot(df_hi.V, df_hi.P, label="$N_x=38$, $N_y=25$, $N_z=13$")
   ax.plot(
     V_floris,
