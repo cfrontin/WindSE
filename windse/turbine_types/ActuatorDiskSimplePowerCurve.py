@@ -195,7 +195,8 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
 
     def power(self, u, inflow_angle):
         # adjust for turbine inefficiency
-        return self.calibration_factor_CPprime0*self.mCPprime0/(self.calibration_factor_CTprime0*self.mCTprime0)*dot(-self.tf,u)/1.0e6  # report in megawatts
+        magic_number = 1.1291826687642552  # comes from calibration studies
+        return magic_number*self.calibration_factor_CPprime0*self.mCPprime0/(self.calibration_factor_CTprime0*self.mCTprime0)*dot(-self.tf,u)/1.0e6  # report in megawatts
 
     def thrust(self, u, inflow_angle):
         # adjust for turbine inefficiency
