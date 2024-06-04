@@ -9,8 +9,8 @@ import seaborn as sns
 plt.style.use(
     [
         "dark_background",
-        # "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_cvf.mplstyle",
-        # "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_nrel.mplstyle",
+        "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_cvf.mplstyle",
+        "https://raw.githubusercontent.com/cfrontin/tools_cvf/main/tools_cvf/stylesheet_nrel.mplstyle",
     ]
 )
 
@@ -24,10 +24,12 @@ do_multi_turbine=False
 
 if do_single_turbine:
   # extract three levels of discretization
-  casename = "kestrel_nx19ny13nz06" # "nx19ny13nz06"
+  casename = "nx19ny13nz06"
+  # casename = "kestrel_nx19ny13nz06" # "nx19ny13nz06"
   df_curves_lo = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
   df_curves_collection = [df_curves_lo]
-  casename = "kestrel_nx27ny18nz09" # "nx27ny18nz09"
+  casename = "nx27ny18nz09"
+  # casename = "kestrel_nx27ny18nz09" # "nx27ny18nz09"
   df_curves_mid = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
   df_curves_collection = [df_curves_lo, df_curves_mid]
   # casename = "kestrel_nx38ny25nz13" # "nx38ny25nz13"
