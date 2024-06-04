@@ -23,23 +23,26 @@ do_multi_turbine=False
 ### SINGLE TURBINE CASE
 
 if do_single_turbine:
-  # extract three levels of discretization
-  casename = "nx19ny13nz06"
-  # casename = "kestrel_nx19ny13nz06" # "nx19ny13nz06"
-  df_curves_lo = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
-  df_curves_collection = [df_curves_lo]
-  casename = "nx27ny18nz09"
-  # casename = "kestrel_nx27ny18nz09" # "nx27ny18nz09"
-  df_curves_mid = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
-  df_curves_collection = [df_curves_lo, df_curves_mid]
-  # casename = "kestrel_nx38ny25nz13" # "nx38ny25nz13"
-  # df_curves_hi = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
-  # df_curves_collection = [df_curves_lo, df_curves_mid, df_curves_hi]
-  label_collection = [
-    "$N_x=19$, $N_y=13$, $N_z=6$",
-    "$N_x=27$, $N_y=18$, $N_z=9$",
-    "$N_x=38$, $N_y=25$, $N_z=13$",
-  ]
+  df_curves_collection = []
+  label_collection = []
+  if False:
+    # extract three levels of discretization
+    casename = "nx19ny13nz06"
+    # casename = "kestrel_nx19ny13nz06" # "nx19ny13nz06"
+    df_curves_lo = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
+    df_curves_collection.append(df_curves_lo)
+    label_collection.append("$N_x=19$, $N_y=13$, $N_z=6$")
+  if True:
+    casename = "nx27ny18nz09"
+    # casename = "kestrel_nx27ny18nz09" # "nx27ny18nz09"
+    df_curves_mid = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
+    df_curves_collection.append(df_curves_mid)
+    label_collection.append("$N_x=27$, $N_y=18$, $N_z=9$")
+  if False:
+    casename = "kestrel_nx38ny25nz13" # "nx38ny25nz13"
+    df_curves_hi = pd.read_csv(f"../curves_{casename}.csv", names=["V","P","Tf"])
+    df_curves_collection = [df_curves_lo, df_curves_mid, df_curves_hi]
+    label_collection.append("$N_x=38$, $N_y=25$, $N_z=13$")
 
   # get FLORIS reference data
   rho_fluid = 1.225
@@ -114,20 +117,20 @@ if do_single_turbine:
   ax.legend()
   fig.savefig("single_turb_CPconv.png", dpi=300, bbox_inches="tight")
 
-  fig, ax = plt.subplots()
-
-  for df_power, label_case in zip(df_curves_collection, label_collection):
-    ax.plot(
-      df_power.V,
-      (
-        rho_fluid*df_power.P/Ps_fluid(df_power.V)
-      )/np.interp(
-        df_power.V,
-        V_floris[1:],
-        P_floris[1:]/1e3/Ps_fluid(V_floris[1:]),
-      ),
-      label=label_case,
-    )
+  # fig, ax = plt.subplots()
+  #
+  # for df_power, label_case in zip(df_curves_collection, label_collection):
+  #   ax.plot(
+  #     df_power.V,
+  #     (
+  #       rho_fluid*df_power.P/Ps_fluid(df_power.V)
+  #     )/np.interp(
+  #       df_power.V,
+  #       V_floris[1:],
+  #       P_floris[1:]/1e3/Ps_fluid(V_floris[1:]),
+  #     ),
+  #     label=label_case,
+  #   )
 
   ## thrust plot
 
