@@ -76,3 +76,4 @@ problem:
 solver:
     type: steady
     save_power: true
+    save_thrust: true
