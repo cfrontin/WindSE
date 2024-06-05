@@ -14,7 +14,7 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
 
     def __init__(self, i, x, y, dom, imported_params=None):
         # Define the acceptable column of an wind_farm.csv imput file
-        self.yaml_inputs = ["HH", "RD", "yaw", "thickness", "CTprime0", "CPprime0", "Vrated", "force"]
+        self.yaml_inputs = ["HH", "RD", "yaw", "thickness", "CTprime0", "CPprime0", "Prated", "force"]
 
         # Init turbine
         super(ActuatorDiskSimplePowerCurve, self).__init__(i,x,y,dom,imported_params)
@@ -45,7 +45,7 @@ class ActuatorDiskSimplePowerCurve(GenericTurbine):
         self.mPrated   = Constant(self.Prated, name="Prated_{:d}".format(self.index))
 
         # The control list is very important for extracting information from the optimzation step.
-        self.controls_list = ["x","y","yaw","CPprime0","CTprime0","Prated","Vrated"]
+        self.controls_list = ["x","y","yaw","CPprime0","CTprime0","Prated"]
 
     def build_actuator_disk(self):
 
