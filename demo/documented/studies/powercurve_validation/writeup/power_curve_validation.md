@@ -7,18 +7,24 @@ We consider the discretization dependence of the `WindSE` results, and the compa
 
 ## Tuning methodology
 
-Using the `IEA-3.4MW-130m` turbine, we run a validation study across
+Using the `IEA-3.4MW-130m` turbine, we run a calibration study at one region II velocity and one region III velocity to adjust the power curve model parameters to match the reference curves for the turbine.
+A magic number scaling parameter is applied to the output power to achieve a match between the force/velocity product power and the expected output shaft power.
 
 ## Single turbine: discretization dependence
 
 In this section we compare the `WindSE` results to the canonical IEA 3.4MW 130m turbine's power curve that is an input to `FLORIS`.
 
+![Power curve convergence plot](single_turb_Tconv.png)
+
+The first plot here shows the thrust curves compared to the reference turbine data, and demonstrates a strong match for a single turbine.
+The thrust peaking behavior in the reference power curve is due to the lack of thrust peak-shaving control, and `WindSE` implicitly performs peak shaving by the smoothing method used to achieve differentiability.
+Long run behavior in velocity exhibits some inexact scaling; this is likely due to inaccuracy-- or at least mismatch-- in the induction profiles assumed for `WindSE`'s actuator disk.
+
 ![Power curve convergence plot](single_turb_Pconv.png)
 
 FLORIS includes cut-in behavior that is not modeled in region I or region I.5.
-Comparison with the standard IEA-3.4MW-130m power curve used for FLORIS demonstrates similar power behavior in region II, with an apparent overprediction of $C_P$.
-The FLORIS curve does not have thrust-peak shaving, while the `WindSE` power curve does, so there is a power mismatch in region II.5.
-In region III, there appears to be a slight overprediction of power.
+Comparison with the standard IEA-3.4MW-130m power curve used for FLORIS demonstrates similar power behavior in region II, with an slight apparent overprediction of $C_P$.
+The FLORIS curve does not have thrust-peak shaving, while the `WindSE` power curve implicitly does (via the smoothing), so there is a power mismatch in region II.5.
 
 ![$C_P$ curve convergence plot](single_turb_CPconv.png)
 
@@ -27,14 +33,18 @@ As noted previously, region II.5 is not modeled in the FLORIS power curve, but l
 
 ## Multi-turbine: discretization dependence
 
-TO DO!
+We now run a three-turbine case with waked turbines to validate that behavior matches expectation.
+In this case, we have three directly-waked turbines at $7.5D$ spacing.
 
-## Single turbine: multi-tool comparison
+![Farm thrust curve convergence plot](multi_turb_Tconv.png)
 
-TO DO!
+As previously, FLORIS does not implement peak-shaving which is implicitly included in the WindSE results.
+Outside of region II.5 (peak-shaving), there is a strong qualitative match between the thrust of the turbines in WindSE and the FLORIS simulation.
+This indicates that WindSE is correctly estimating the thrust on a given turbine as well as passing the resulting thrust into the flowfield correctly.
 
-## Multi-turbine: multi-tool comparison
+![Farm power curve convergence plot](multi_turb_Pconv.png)
 
-TO DO!
+In the power curves, WindSE again makes a strong prediction that is closely matched with the FLORIS result, less thrust peak-shaving in region II.5.
+
 
 <!-- -->
